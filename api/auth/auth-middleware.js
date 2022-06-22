@@ -44,8 +44,31 @@ const checkUsernameExists = (req, res, next) => {
 
 
 const validateRoleName = (req, res, next) => {
+  let { role_name } = req.body;
+
+  if (typeof role_name !== 'string' || role_name.trim().length === '') {
+    req.body.role_name = 'student';
+    next();
+    return;
+  }
+
+  if (role_name.trim() === 'admin') {
+    next({status: 422, message: "Role name can not be admin"});
+    return;
+  }
+
+  if (role_name.trim().length > 32) {
+    next({status: 422, message: "Role name can not be longer than 32 chars"});
+    return;
+  }
+
+  req.body.role_name = role_name.trim();
+  next();
+
   /*
     If the role_name in the body is valid, set req.role_name to be the trimmed string and proceed.
+
+    { "username": "anna", "password": "1234", "role_name": "angel" }
 
     If role_name is missing from req.body, or if after trimming it is just an empty string,
     set req.role_name to be 'student' and allow the request to proceed.
